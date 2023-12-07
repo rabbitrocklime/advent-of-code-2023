@@ -28,19 +28,19 @@ class Day04 {
     private fun calculateHits(pair: Pair) = pair.numbers.count { pair.winningNumbers.contains(it) }
 
 
-    private fun countCopies(scratchBooks: List<Pair>, initial : Int, finish : Int = scratchBooks.size) :Int {
+    /*private fun countCopies(scratchBooks: List<Pair>, initial : Int = 0) :Int {
         var copies = 0;
-        for ((index, s) in scratchBooks.withIndex()) {
-            val calculateHits = calculateHits(s)
-            if (calculateHits == 0) {
-                break
-            }
-            if (calculateHits > 0) {
-                copies += countCopies(scratchBooks, index + initial, finish - index)
+
+        for (i in 0..<scratchBooks.size) {
+            val calculateHits = calculateHits(scratchBooks[i])
+
+            for (j in initial+i+1..initial+calculateHits) {
+                copies+= countCopies(scratchBooks, initial + 1 + j)
             }
         }
+
         return copies
-    }
+    }*/
 
     fun puzzle1(): Int {
         return buildScratchBooks()
@@ -58,7 +58,21 @@ class Day04 {
         }
 
     fun puzzle2(): Int {
-       return  countCopies(buildScratchBooks(), 0)
+        val cards = file.readLines()
+            .map {
+                it.substringAfter(": ")
+                    .split(" | ").map {
+                        it.windowed(3, 3, true).map { it.trim().toInt() }
+                    }
+            }
 
+        val copies = IntArray(cards.size) { 1 }
+        cards.forEachIndexed { idx, (winners, mine) ->
+            val count = mine.intersect(winners).count()
+            (idx + 1..idx + count).forEachIndexed { _, i ->
+                if (i < copies.size) copies[i] += copies[idx]
+            }
+        }
+        return copies.sum()
     }
 }
